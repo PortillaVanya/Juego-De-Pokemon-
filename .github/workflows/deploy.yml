@@ -29,12 +29,39 @@ jobs:
         with:
           node-version: 20
 
-      - name: Instalar dependencias y compilar
+      - name: Instalar dependencias
         run: |
           if [ -d "pokedex-app" ]; then
             cd pokedex-app
           fi
           npm install
+
+      - name: Linter (oxlint)
+        run: |
+          if [ -d "pokedex-app" ]; then
+            cd pokedex-app
+          fi
+          npm run lint
+
+      - name: Verificación de tipos (TypeScript)
+        run: |
+          if [ -d "pokedex-app" ]; then
+            cd pokedex-app
+          fi
+          npm run typecheck
+
+      - name: Pruebas (Vitest)
+        run: |
+          if [ -d "pokedex-app" ]; then
+            cd pokedex-app
+          fi
+          npm run test:run
+
+      - name: Compilar
+        run: |
+          if [ -d "pokedex-app" ]; then
+            cd pokedex-app
+          fi
           npm run build
         env:
           VITE_POKEAPI_URL: https://pokeapi.co/api/v2

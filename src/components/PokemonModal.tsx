@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { TYPE_COLORS, TYPE_TRANSLATIONS, playPokemonCry } from '../services/pokemonService';
+import { useEffect, useRef, useState } from 'react';
+import { getTypeColor, getTypeLabel, playPokemonCry } from '../services/pokemonService';
+import type { Pokemon } from '../types/pokemon';
 import './PokemonModal.css';
 
-const STAT_LABELS = {
+const STAT_LABELS: Record<string, string> = {
   hp: 'HP',
   attack: 'Ataque',
   defense: 'Defensa',
@@ -11,23 +12,31 @@ const STAT_LABELS = {
   speed: 'Velocidad'
 };
 
-function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }) {
+export interface PokemonModalProps {
+  pokemon: Pokemon;
+  isInTeam: boolean;
+  onToggleTeam?: (pokemon: Pokemon) => void;
+  onSelectType?: (typeName: string) => void;
+  onClose: () => void;
+}
+
+function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }: PokemonModalProps) {
   const [showShiny, setShowShiny] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Vincular con URL hash para enlace compartible (ej: #pokemon-25)
   useEffect(() => {
-    if (pokemon) {
-      window.history.replaceState(null, '', `#pokemon-${pokemon.id}`);
-    }
+    window.history.replaceState(null, '', `#pokemon-${pokemon.id}`);
     return () => {
       window.history.replaceState(null, '', window.location.pathname);
     };
   }, [pokemon]);
 
-  // Cerrar modal al presionar tecla ESC
+  // Cerrar modal al presionar tecla ESC y mover el foco al botón de cierre (accesibilidad)
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
@@ -36,14 +45,11 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  if (!pokemon) return null;
-
   const mainType = pokemon.types[0]?.type?.name || 'normal';
-  const mainColor = TYPE_COLORS[mainType] || '#3b82f6';
+  const mainColor = getTypeColor(mainType);
 
   const normalArtwork =
-    pokemon.sprites?.other?.['official-artwork']?.front_default ||
-    pokemon.sprites?.front_default;
+    pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default;
 
   const shinyArtwork =
     pokemon.sprites?.other?.['official-artwork']?.front_shiny ||
@@ -58,21 +64,25 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
 
   const handleShare = () => {
     const url = `${window.location.origin}${window.location.pathname}#pokemon-${pokemon.id}`;
-    navigator.clipboard.writeText(url);
+    void navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleTypeClick = (typeName) => {
-    if (onSelectType) {
-      onSelectType(typeName);
-      onClose();
-    }
+  const handleTypeClick = (typeName: string) => {
+    onSelectType?.(typeName);
+    onClose();
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Detalles de ${pokemon.name}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Encabezado con color temático */}
         <div
           className="modal-header"
@@ -81,6 +91,7 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
           }}
         >
           <button
+            ref={closeButtonRef}
             className="modal-close-btn"
             onClick={onClose}
             aria-label="Cerrar modal"
@@ -88,11 +99,7 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
             ✕
           </button>
 
-          <img
-            src={currentArtwork}
-            alt={pokemon.name}
-            className="modal-artwork"
-          />
+          <img src={currentArtwork ?? ''} alt={pokemon.name} className="modal-artwork" />
 
           {/* Acciones del encabezado: Shiny, Sonido, Compartir */}
           <div className="modal-actions-bar">
@@ -148,11 +155,11 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
                     key={typeName}
                     type="button"
                     className="modal-type-btn"
-                    style={{ backgroundColor: TYPE_COLORS[typeName] || '#94a3b8' }}
+                    style={{ backgroundColor: getTypeColor(typeName) }}
                     onClick={() => handleTypeClick(typeName)}
-                    title={`Ver todos los Pokémon de tipo ${TYPE_TRANSLATIONS[typeName] || typeName}`}
+                    title={`Ver todos los Pokémon de tipo ${getTypeLabel(typeName)}`}
                   >
-                    {TYPE_TRANSLATIONS[typeName] || typeName}
+                    {getTypeLabel(typeName)}
                   </button>
                 );
               })}
@@ -196,9 +203,7 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
 
               return (
                 <div key={statName} className="stat-row">
-                  <span className="stat-label">
-                    {STAT_LABELS[statName] || statName}
-                  </span>
+                  <span className="stat-label">{STAT_LABELS[statName] || statName}</span>
                   <span className="stat-value">{val}</span>
                   <div className="stat-bar-container">
                     <div

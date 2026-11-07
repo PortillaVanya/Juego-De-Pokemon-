@@ -1,16 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getPokemonDetails, playPokemonCry } from '../services/pokemonService';
+import type { Pokemon, PokemonListItem } from '../types/pokemon';
 import './WhoIsThatPokemon.css';
 
-function WhoIsThatPokemon({ candidateList, onClose }) {
-  const [currentPokemon, setCurrentPokemon] = useState(null);
-  const [options, setOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState(null);
+export interface WhoIsThatPokemonProps {
+  candidateList: PokemonListItem[];
+  onClose: () => void;
+}
+
+function WhoIsThatPokemon({ candidateList, onClose }: WhoIsThatPokemonProps) {
+  const [currentPokemon, setCurrentPokemon] = useState<Pokemon | null>(null);
+  const [options, setOptions] = useState<string[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const startNewRound = async () => {
+  const startNewRound = useCallback(async () => {
     if (!candidateList || candidateList.length < 4) return;
 
     setLoading(true);
@@ -31,13 +37,15 @@ function WhoIsThatPokemon({ candidateList, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    startNewRound();
   }, [candidateList]);
 
-  const handleGuess = (guessedName) => {
+  useEffect(() => {
+    // Arranca (o reinicia) una ronda cada vez que cambia la lista de candidatos.
+    // oxlint-disable-next-line react/set-state-in-effect
+    void startNewRound();
+  }, [startNewRound]);
+
+  const handleGuess = (guessedName: string) => {
     if (revealed || !currentPokemon) return;
 
     setSelectedOption(guessedName);
@@ -104,7 +112,7 @@ function WhoIsThatPokemon({ candidateList, onClose }) {
             <div className="options-grid">
               {options.map((optName) => {
                 let btnClass = 'option-btn';
-                if (revealed) {
+                if (revealed && currentPokemon) {
                   if (optName.toLowerCase() === currentPokemon.name.toLowerCase()) {
                     btnClass += ' correct';
                   } else if (optName === selectedOption) {
@@ -125,7 +133,7 @@ function WhoIsThatPokemon({ candidateList, onClose }) {
               })}
             </div>
 
-            {revealed && (
+            {revealed && currentPokemon && (
               <div>
                 <p className={`minigame-result ${isCorrect ? 'success' : 'failure'}`}>
                   {isCorrect
@@ -154,4 +162,3 @@ function WhoIsThatPokemon({ candidateList, onClose }) {
 }
 
 export default WhoIsThatPokemon;
-

@@ -1,6 +1,14 @@
+import type { Pokemon } from '../types/pokemon';
 import './TeamBuilder.css';
 
-function TeamBuilder({ team, onRemovePokemon, onSelectPokemon, onClearTeam }) {
+export interface TeamBuilderProps {
+  team: Pokemon[];
+  onRemovePokemon: (pokemonName: string) => void;
+  onSelectPokemon: (pokemon: Pokemon) => void;
+  onClearTeam: () => void;
+}
+
+function TeamBuilder({ team, onRemovePokemon, onSelectPokemon, onClearTeam }: TeamBuilderProps) {
   const maxSlots = 6;
   const slots = Array.from({ length: maxSlots });
 
@@ -35,6 +43,14 @@ function TeamBuilder({ team, onRemovePokemon, onSelectPokemon, onClearTeam }) {
                 key={member.name}
                 className="team-slot filled"
                 onClick={() => onSelectPokemon(member)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectPokemon(member);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
                 title={`Ver detalles de ${member.name}`}
               >
                 <button
@@ -43,11 +59,12 @@ function TeamBuilder({ team, onRemovePokemon, onSelectPokemon, onClearTeam }) {
                     e.stopPropagation();
                     onRemovePokemon(member.name);
                   }}
+                  aria-label={`Eliminar ${member.name} del equipo`}
                   title="Eliminar del equipo"
                 >
                   ✕
                 </button>
-                <img src={sprite} alt={member.name} className="slot-sprite" />
+                <img src={sprite ?? ''} alt={member.name} className="slot-sprite" />
                 <span className="slot-name">{member.name}</span>
               </div>
             );
@@ -66,4 +83,3 @@ function TeamBuilder({ team, onRemovePokemon, onSelectPokemon, onClearTeam }) {
 }
 
 export default TeamBuilder;
-
