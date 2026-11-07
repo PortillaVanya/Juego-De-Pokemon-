@@ -154,3 +154,4 @@ function WhoIsThatPokemon({ candidateList, onClose }) {
 }
 
 export default WhoIsThatPokemon;
+

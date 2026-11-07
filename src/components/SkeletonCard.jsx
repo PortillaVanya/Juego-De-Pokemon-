@@ -16,3 +16,4 @@ function SkeletonCard() {
 }
 
 export default SkeletonCard;
+

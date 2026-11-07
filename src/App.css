@@ -235,12 +235,12 @@
   color: var(--text-heading);
 }
 
-/* Cuadrícula CSS Grid Responsiva */
+/* Cuadrícula CSS Grid Responsiva y Espaciosa */
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 22px;
-  padding: 8px 0;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 32px;
+  padding: 16px 0 24px 0;
 }
 
 /* Estados Vacíos / Mensajes */
