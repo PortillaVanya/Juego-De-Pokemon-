@@ -1,16 +1,92 @@
-# React + Vite
+# Pokédex App - Taller Práctico React
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicación web interactiva construida con **React**, **Vite** y **Axios** que consume en tiempo real la API de [PokéAPI](https://pokeapi.co/), gestiona estados asíncronos (carga, error y éxito) y permite filtrado dinámico en tiempo real.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Tecnologías Utilizadas
 
-## React Compiler
+- **React 19**
+- **Vite**
+- **Axios**
+- **PokéAPI REST API v2**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 📁 Estructura del Proyecto
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```text
+pokedex-app/
+├── public/
+├── src/
+│   ├── components/
+│   │   └── PokemonCard.jsx      # Tarjeta individual con detalles e imagen de cada Pokémon
+│   ├── services/
+│   │   └── pokemonService.js   # Peticiones HTTP a PokéAPI mediante Axios
+│   ├── App.jsx                 # Vista principal, estado global y filtrado
+│   ├── index.css               # Estilos globales normalizados
+│   └── main.jsx                # Punto de entrada de la aplicación
+├── .env                        # Variables de entorno (VITE_POKEAPI_URL)
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## 💻 Ejecución en Entorno Local
+
+1. Acceder al directorio del proyecto:
+   ```bash
+   cd pokedex-app
+   ```
+
+2. Instalar dependencias (en caso de clonar el proyecto):
+   ```bash
+   npm install
+   ```
+
+3. Iniciar el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+
+4. Abrir en el navegador la URL indicada (generalmente `http://localhost:5173`).
+
+---
+
+## ☁️ Guía de Despliegue en Producción
+
+### 1. Subir a GitHub
+1. Crear un nuevo repositorio en tu cuenta de [GitHub](https://github.com/new) (ej. `pokedex-react-app`).
+2. Vincular el repositorio remoto y subir los cambios:
+   ```bash
+   cd pokedex-app
+   git remote add origin https://github.com/TU_USUARIO/pokedex-react-app.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### 2. Despliegue en Vercel
+1. Ingresa a [Vercel](https://vercel.com/) e inicia sesión con GitHub.
+2. Haz clic en **"Add New..."** > **"Project"**.
+3. Importa tu repositorio `pokedex-react-app`.
+4. En la configuración del proyecto:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `./` (o `pokedex-app` si subes la carpeta contenedora)
+   - **Environment Variables**:
+     - Nombre: `VITE_POKEAPI_URL`
+     - Valor: `https://pokeapi.co/api/v2`
+5. Haz clic en **Deploy**.
+
+### 3. Despliegue en Netlify
+1. Ingresa a [Netlify](https://www.netlify.com/) e inicia sesión con GitHub.
+2. Selecciona **"Add new site"** > **"Import an existing project"**.
+3. Selecciona tu repositorio de GitHub.
+4. Parámetros de compilación:
+   - **Build command**: `npm run build`
+   - **Publish directory**: `dist`
+   - **Environment variables**:
+     - Clave: `VITE_POKEAPI_URL`
+     - Valor: `https://pokeapi.co/api/v2`
+5. Haz clic en **Deploy site**.
