@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type {
+  BattleMove,
   Generation,
   Pokemon,
   PokemonListResponse,
@@ -100,6 +101,123 @@ export const playPokemonCry = (pokemon: Pokemon | null | undefined): HTMLAudioEl
   } catch {
     return null;
   }
+};
+
+/** Devuelve el sprite animado oficial (Gen 5 GIF) con fallback fluido a artwork o front_default */
+export const getAnimatedSprite = (pokemon?: Pokemon | null, shiny = false): string => {
+  if (!pokemon) return '';
+  const gen5Animated = pokemon.sprites?.versions?.['generation-v']?.['black-white']?.animated;
+  if (shiny && gen5Animated?.front_shiny) return gen5Animated.front_shiny;
+  if (!shiny && gen5Animated?.front_default) return gen5Animated.front_default;
+
+  // Fallbacks
+  if (shiny) {
+    return (
+      pokemon.sprites?.other?.['official-artwork']?.front_shiny ||
+      pokemon.sprites?.front_shiny ||
+      pokemon.sprites?.front_default ||
+      ''
+    );
+  }
+  return (
+    pokemon.sprites?.other?.['official-artwork']?.front_default ||
+    pokemon.sprites?.front_default ||
+    ''
+  );
+};
+
+/** Devuelve el sprite trasero animado para la vista del jugador en combate */
+export const getBackSprite = (pokemon?: Pokemon | null, shiny = false): string => {
+  if (!pokemon) return '';
+  const gen5Animated = pokemon.sprites?.versions?.['generation-v']?.['black-white']?.animated;
+  if (shiny && gen5Animated?.back_shiny) return gen5Animated.back_shiny;
+  if (!shiny && gen5Animated?.back_default) return gen5Animated.back_default;
+
+  if (shiny && pokemon.sprites?.back_shiny) return pokemon.sprites.back_shiny;
+  if (pokemon.sprites?.back_default) return pokemon.sprites.back_default;
+
+  return getAnimatedSprite(pokemon, shiny);
+};
+
+/** Sintetiza un efecto de sonido de impacto estilo videojuego retro usando Web Audio API */
+export const playHitSound = (type = 'normal'): void => {
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    if (type === 'electric') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(520, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.22);
+    } else if (type === 'fire') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.28);
+    } else if (type === 'water') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+    } else {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.2);
+    }
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch {
+    // Continuar si Web Audio no está disponible
+  }
+};
+
+/** Genera movimientos icónicos de combate según los tipos elementales del Pokémon */
+export const getPokemonMoves = (pokemon: Pokemon): BattleMove[] => {
+  const typeMoves: Record<string, BattleMove[]> = {
+    electric: [
+      { name: 'Impactrueno', type: 'electric', power: 40, description: 'Lanza una descarga eléctrica moderada.' },
+      { name: 'Rayo', type: 'electric', power: 90, description: 'Poderoso relámpago con alta potencia.' }
+    ],
+    fire: [
+      { name: 'Ascuas', type: 'fire', power: 40, description: 'Lanza pequeñas llamas al oponente.' },
+      { name: 'Lanzallamas', type: 'fire', power: 90, description: 'Ráfaga ardiente de fuego continuo.' }
+    ],
+    water: [
+      { name: 'Pistola Agua', type: 'water', power: 40, description: 'Dispara un potente chorro de agua.' },
+      { name: 'Hidrobomba', type: 'water', power: 110, description: 'Furia torrencial de agua masiva.' }
+    ],
+    grass: [
+      { name: 'Látigo Cepa', type: 'grass', power: 45, description: 'Azota al enemigo con lianas flexibles.' },
+      { name: 'Hoja Afilada', type: 'grass', power: 65, description: 'Cuchillas de hojas cortantes.' }
+    ],
+    poison: [
+      { name: 'Picotazo Veneno', type: 'poison', power: 35, description: 'Ataque venenoso punzante.' },
+      { name: 'Bomba Lodo', type: 'poison', power: 90, description: 'Lanza lodo tóxico con gran impacto.' }
+    ],
+    psychic: [
+      { name: 'Confusión', type: 'psychic', power: 50, description: 'Onda mental desestabilizadora.' },
+      { name: 'Psíquico', type: 'psychic', power: 90, description: 'Fuerza telequinética aplastante.' }
+    ]
+  };
+
+  const normalMoves: BattleMove[] = [
+    { name: 'Placaje', type: 'normal', power: 40, description: 'Embestida frontal de cuerpo entero.' },
+    { name: 'Ataque Rápido', type: 'normal', power: 40, description: 'Velocidad cegadora antes de golpear.' }
+  ];
+
+  const primaryType = pokemon.types[0]?.type?.name || 'normal';
+  const customList = typeMoves[primaryType] || [
+    { name: 'Golpe Cabeza', type: 'normal', power: 70, description: 'Cabezazo contundente con fuerza.' },
+    { name: 'Hipercolmillo', type: 'normal', power: 80, description: 'Mordisco feroz devastador.' }
+  ];
+
+  return [...customList, ...normalMoves].slice(0, 4);
 };
 
 export const GENERATIONS: Generation[] = [

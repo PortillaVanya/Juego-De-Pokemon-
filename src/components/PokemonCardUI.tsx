@@ -11,6 +11,7 @@ export interface PokemonCardUIProps {
   onToggleTeam: (pokemon: Pokemon) => void;
   onPlayCry: (pokemon: Pokemon) => void;
   onSelect: (pokemon: Pokemon) => void;
+  onBattle?: (pokemon: Pokemon) => void;
 }
 
 /**
@@ -24,7 +25,8 @@ function PokemonCardUI({
   onSelectType,
   onToggleTeam,
   onPlayCry,
-  onSelect
+  onSelect,
+  onBattle
 }: PokemonCardUIProps) {
   if (!pokemon) return null;
 
@@ -72,6 +74,19 @@ function PokemonCardUI({
           aria-label={`Reproducir sonido de ${pokemon.name}`}
         >
           🔊
+        </button>
+
+        <button
+          type="button"
+          className="card-icon-btn battle-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onBattle) onBattle(pokemon);
+          }}
+          title={`Combatir con ${pokemon.name} en la Arena de Batalla`}
+          aria-label={`Combatir con ${pokemon.name}`}
+        >
+          ⚔️
         </button>
 
         <button

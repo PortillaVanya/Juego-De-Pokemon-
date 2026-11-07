@@ -20,6 +20,7 @@ import './App.css';
 // Lazy loading para componentes pesados y modales (Optimización de Rendimiento)
 const PokemonModal = lazy(() => import('./components/PokemonModal'));
 const WhoIsThatPokemon = lazy(() => import('./components/WhoIsThatPokemon'));
+const BattleArena = lazy(() => import('./components/BattleArena'));
 
 function App() {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -33,6 +34,8 @@ function App() {
   const [sortBy, setSortBy] = useState<SortOption>('id-asc');
 
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [battlePlayerPokemon, setBattlePlayerPokemon] = useState<Pokemon | null>(null);
+  const [showBattleArena, setShowBattleArena] = useState(false);
   const [showMinigame, setShowMinigame] = useState(false);
   const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -92,6 +95,25 @@ function App() {
       return { ...prev, [details.name]: details };
     });
   }, []);
+
+  // Iniciar combate en la Arena
+  const handleStartBattle = useCallback(
+    (fighter?: Pokemon) => {
+      if (fighter) {
+        setBattlePlayerPokemon(fighter);
+        setShowBattleArena(true);
+      } else if (team.length > 0) {
+        setBattlePlayerPokemon(team[0]);
+        setShowBattleArena(true);
+      } else if (catalog.length > 0) {
+        void getPokemonDetails(catalog[0].name).then((details) => {
+          setBattlePlayerPokemon(details);
+          setShowBattleArena(true);
+        });
+      }
+    },
+    [team, catalog]
+  );
 
   // Soporte para deep-linking con URL hash (ej: #pokemon-25)
   useEffect(() => {
@@ -168,6 +190,16 @@ function App() {
           </div>
 
           <div className="header-actions">
+            <button
+              type="button"
+              className="battle-header-btn"
+              onClick={() => handleStartBattle()}
+              title="Entrar a la Arena de Batalla Pokémon"
+              aria-label="Iniciar combate en la Arena Pokémon"
+            >
+              ⚔️ Batalla
+            </button>
+
             <button
               type="button"
               className="minigame-btn"
@@ -333,6 +365,7 @@ function App() {
                       onSelectType={handleSelectType}
                       onToggleTeam={handleToggleTeam}
                       onSelect={setSelectedPokemon}
+                      onBattle={handleStartBattle}
                       onLoadedDetails={handleLoadedDetails}
                     />
                   );
@@ -380,7 +413,19 @@ function App() {
             isInTeam={isInTeam(selectedPokemon.name)}
             onToggleTeam={handleToggleTeam}
             onSelectType={handleSelectType}
+            onBattle={handleStartBattle}
             onClose={() => setSelectedPokemon(null)}
+          />
+        </Suspense>
+      )}
+
+      {/* Arena de Batalla Pokémon (Modo Combate) */}
+      {showBattleArena && battlePlayerPokemon && (
+        <Suspense fallback={<div className="battle-backdrop">Cargando Arena de Combate...</div>}>
+          <BattleArena
+            playerPokemon={battlePlayerPokemon}
+            candidateList={catalog}
+            onClose={() => setShowBattleArena(false)}
           />
         </Suspense>
       )}

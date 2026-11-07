@@ -10,6 +10,18 @@ export interface PokemonSprites {
       front_shiny: string | null;
     };
   };
+  versions?: {
+    'generation-v'?: {
+      'black-white'?: {
+        animated?: {
+          front_default: string | null;
+          front_shiny: string | null;
+          back_default?: string | null;
+          back_shiny?: string | null;
+        };
+      };
+    };
+  };
 }
 
 // Cries (sounds)
@@ -106,3 +118,11 @@ export type PokemonTypeName =
 
 // Sort options
 export type SortOption = 'id-asc' | 'id-desc' | 'name-asc' | 'name-desc' | 'hp-desc' | 'attack-desc';
+
+// Battle move interface
+export interface BattleMove {
+  name: string;
+  type: PokemonTypeName;
+  power: number;
+  description: string;
+}

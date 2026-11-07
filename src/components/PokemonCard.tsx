@@ -12,6 +12,7 @@ export interface PokemonCardProps {
   onSelectType: (typeName: string) => void;
   onToggleTeam: (pokemon: Pokemon) => void;
   onSelect: (pokemon: Pokemon) => void;
+  onBattle?: (pokemon: Pokemon) => void;
   onLoadedDetails?: (pokemon: Pokemon) => void;
 }
 
@@ -29,6 +30,7 @@ function PokemonCard({
   onSelectType,
   onToggleTeam,
   onSelect,
+  onBattle,
   onLoadedDetails
 }: PokemonCardProps) {
   const { pokemon, loading } = usePokemon(pokemonName);
@@ -54,6 +56,7 @@ function PokemonCard({
       onToggleTeam={onToggleTeam}
       onPlayCry={playPokemonCry}
       onSelect={onSelect}
+      onBattle={onBattle}
     />
   );
 }

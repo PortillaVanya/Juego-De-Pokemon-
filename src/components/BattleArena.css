@@ -1,0 +1,345 @@
+.battle-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.battle-arena-container {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  background: #0f172a;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  border: 2px solid #334155;
+  display: flex;
+  flex-direction: column;
+}
+
+.battle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  color: #ffffff;
+}
+
+.battle-header-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.battle-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.battle-close-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Escenario de combate */
+.battle-stage {
+  position: relative;
+  height: 330px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 60%, #152e2e 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 24px;
+}
+
+.battle-stage.screen-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-3px, -2px, 0); }
+  20%, 80% { transform: translate3d(4px, 3px, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, -4px, 0); }
+  40%, 60% { transform: translate3d(6px, 4px, 0); }
+}
+
+/* Plataforma y elementos enemigos (Arriba Derecha) */
+.enemy-zone {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.player-zone {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+/* Tarjeta de estado de batalla (HUD estilo Game Boy/DS) */
+.battle-hud {
+  background: rgba(30, 41, 59, 0.92);
+  border: 2px solid #475569;
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 220px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.hud-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.hud-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #f8fafc;
+  text-transform: capitalize;
+}
+
+.hud-lvl {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.hp-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hp-tag {
+  font-size: 10px;
+  font-weight: 900;
+  color: #f59e0b;
+  letter-spacing: 0.5px;
+}
+
+.hp-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #334155;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease-out, background-color 0.4s ease;
+}
+
+.hud-hp-numbers {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* Plataforma del Pokémon */
+.pokemon-platform {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.platform-ground {
+  position: absolute;
+  bottom: 0;
+  width: 130px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.35) 0%, rgba(34, 197, 94, 0) 70%);
+  transform: rotateX(60deg);
+}
+
+.battle-sprite {
+  max-width: 120px;
+  max-height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
+  image-rendering: pixelated;
+  transition: transform 0.2s ease;
+}
+
+/* Animaciones de combate */
+.player-attacking {
+  animation: playerLunge 0.35s ease-in-out;
+}
+
+@keyframes playerLunge {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(60px, -40px) scale(1.15); }
+  100% { transform: translate(0, 0); }
+}
+
+.enemy-attacking {
+  animation: enemyLunge 0.35s ease-in-out;
+}
+
+@keyframes enemyLunge {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-60px, 40px) scale(1.15); }
+  100% { transform: translate(0, 0); }
+}
+
+.hit-flash {
+  animation: hitBlink 0.4s ease-in-out;
+}
+
+@keyframes hitBlink {
+  0%, 100% { filter: brightness(1) drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4)); }
+  25%, 75% { filter: brightness(2.5) contrast(2) drop-shadow(0 0 16px #ef4444); transform: translate(8px, -4px); }
+  50% { filter: brightness(0.2) drop-shadow(0 0 8px #ef4444); transform: translate(-8px, 4px); }
+}
+
+.fainted {
+  animation: faintSink 0.8s forwards ease-in;
+}
+
+@keyframes faintSink {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(50px) scale(0.7); }
+}
+
+/* Daño flotante (VFX) */
+.damage-floating {
+  position: absolute;
+  top: 10px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ef4444;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8), 0 0 12px #f87171;
+  animation: floatUpDamage 0.8s forwards cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes floatUpDamage {
+  0% { opacity: 0; transform: translateY(10px) scale(0.6); }
+  30% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-40px) scale(1); }
+}
+
+/* Caja de diálogo de combate inferior */
+.battle-dialogue-box {
+  background: #1e293b;
+  border-top: 2px solid #334155;
+  padding: 18px 24px;
+}
+
+.battle-log-text {
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+}
+
+/* Rejilla de movimientos (4 botones de ataque) */
+.moves-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.move-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.move-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  border-color: #ffffff;
+}
+
+.move-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.move-name {
+  font-size: 14px;
+}
+
+.move-power {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.battle-action-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.battle-again-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  transition: transform 0.2s;
+}
+
+.battle-again-btn:hover {
+  transform: translateY(-2px);
+  background: #1d4ed8;
+}

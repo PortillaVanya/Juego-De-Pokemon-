@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getTypeColor, getTypeLabel, playPokemonCry } from '../services/pokemonService';
+import { getTypeColor, getTypeLabel, playPokemonCry, getAnimatedSprite } from '../services/pokemonService';
 import type { Pokemon } from '../types/pokemon';
 import './PokemonModal.css';
 
@@ -17,11 +17,13 @@ export interface PokemonModalProps {
   isInTeam: boolean;
   onToggleTeam?: (pokemon: Pokemon) => void;
   onSelectType?: (typeName: string) => void;
+  onBattle?: (pokemon: Pokemon) => void;
   onClose: () => void;
 }
 
-function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }: PokemonModalProps) {
+function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onBattle, onClose }: PokemonModalProps) {
   const [showShiny, setShowShiny] = useState(false);
+  const [showAnimated, setShowAnimated] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -56,7 +58,12 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
     pokemon.sprites?.front_shiny ||
     normalArtwork;
 
-  const currentArtwork = showShiny ? shinyArtwork : normalArtwork;
+  const animatedSprite = getAnimatedSprite(pokemon, showShiny);
+
+  let currentArtwork = showShiny ? shinyArtwork : normalArtwork;
+  if (showAnimated && animatedSprite) {
+    currentArtwork = animatedSprite;
+  }
 
   const formattedId = `#${String(pokemon.id).padStart(3, '0')}`;
   const heightMeters = (pokemon.height / 10).toFixed(1);
@@ -101,9 +108,19 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
 
           <img src={currentArtwork ?? ''} alt={pokemon.name} className="modal-artwork" />
 
-          {/* Acciones del encabezado: Shiny, Sonido, Compartir */}
+          {/* Acciones del encabezado: Animado, Shiny, Sonido, Batalla, Compartir */}
           <div className="modal-actions-bar">
             <button
+              type="button"
+              className={`modal-btn-action ${showAnimated ? 'active' : ''}`}
+              onClick={() => setShowAnimated(!showAnimated)}
+              title="Alternar entre Sprite Animado y Arte HD"
+            >
+              🏃 {showAnimated ? 'HD' : 'Animado'}
+            </button>
+
+            <button
+              type="button"
               className={`modal-btn-action ${showShiny ? 'active' : ''}`}
               onClick={() => setShowShiny(!showShiny)}
               title="Alternar versión Shiny (Variocolor)"
@@ -112,6 +129,7 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
             </button>
 
             <button
+              type="button"
               className="modal-btn-action"
               onClick={() => playPokemonCry(pokemon)}
               title="Reproducir grito del Pokémon"
@@ -119,7 +137,23 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }
               🔊 Sonido
             </button>
 
+            {onBattle && (
+              <button
+                type="button"
+                className="modal-btn-action"
+                style={{ background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)', borderColor: '#ef4444' }}
+                onClick={() => {
+                  onBattle(pokemon);
+                  onClose();
+                }}
+                title="Luchar con este Pokémon en la Arena"
+              >
+                ⚔️ Batalla
+              </button>
+            )}
+
             <button
+              type="button"
               className="modal-btn-action"
               onClick={handleShare}
               title="Copiar enlace directo"
