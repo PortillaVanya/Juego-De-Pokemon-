@@ -4,6 +4,7 @@ const BASE_URL = import.meta.env.VITE_POKEAPI_URL || 'https://pokeapi.co/api/v2'
 
 // Caché en memoria para evitar peticiones redundantes
 const detailsCache = new Map();
+const typeCache = new Map();
 
 export const getPokemonList = async (limit = 40, offset = 0) => {
   try {
@@ -11,6 +12,23 @@ export const getPokemonList = async (limit = 40, offset = 0) => {
     return response.data.results;
   } catch (error) {
     throw new Error('Error al obtener la lista de datos: ' + error.message);
+  }
+};
+
+export const getPokemonByType = async (typeName) => {
+  const key = String(typeName).toLowerCase().trim();
+  if (typeCache.has(key)) {
+    return typeCache.get(key);
+  }
+
+  try {
+    const response = await axios.get(`${BASE_URL}/type/${key}`);
+    // Extraer lista de objetos con { name, url }
+    const list = response.data.pokemon.map((item) => item.pokemon);
+    typeCache.set(key, list);
+    return list;
+  } catch (error) {
+    throw new Error(`Error al obtener Pokémon de tipo ${typeName}: ${error.message}`);
   }
 };
 
@@ -99,6 +117,27 @@ export const TYPE_COLORS = {
   dark: '#5a5465',
   steel: '#5a8fa3',
   fairy: '#ec8fe6'
+};
+
+export const TYPE_ICONS = {
+  normal: '⚪',
+  fire: '🔥',
+  water: '💧',
+  grass: '🌿',
+  electric: '⚡',
+  ice: '❄️',
+  fighting: '🥊',
+  poison: '☠️',
+  ground: '🏜️',
+  flying: '🕊️',
+  psychic: '🔮',
+  bug: '🐛',
+  rock: '🪨',
+  ghost: '👻',
+  dragon: '🐉',
+  dark: '🌑',
+  steel: '⚙️',
+  fairy: '✨'
 };
 
 export const TYPE_TRANSLATIONS = {

@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   getPokemonList,
+  getPokemonByType,
   getPokemonDetails,
+  TYPE_COLORS,
+  TYPE_ICONS,
   TYPE_TRANSLATIONS,
   GENERATIONS
 } from './services/pokemonService';
@@ -61,6 +64,18 @@ function App() {
     }, 2800);
   };
 
+  // Manejar clic en botón de tipo (Planta, Veneno, Fuego, Agua, etc.)
+  const handleSelectType = (typeName) => {
+    if (selectedType === typeName) {
+      setSelectedType('all');
+      showToast('Filtro de tipo desactivado.');
+    } else {
+      setSelectedType(typeName);
+      const spanishName = TYPE_TRANSLATIONS[typeName] || typeName;
+      showToast(`Filtrando por tipo: ${spanishName}`);
+    }
+  };
+
   // Agregar o quitar del equipo
   const handleToggleTeam = (pokemon) => {
     const isAlready = team.some((p) => p.name.toLowerCase() === pokemon.name.toLowerCase());
@@ -108,7 +123,7 @@ function App() {
     return [...currentList, ...unique];
   };
 
-  // Callback de detalles para filtros y ordenamientos
+  // Callback de detalles para ordenamientos y stats
   const handleLoadedDetails = useCallback((details) => {
     setPokemonDetailsMap((prev) => {
       if (prev[details.name]) return prev;
@@ -116,29 +131,64 @@ function App() {
     });
   }, []);
 
-  // Carga de catálogo según generación o inicial
+  // Carga de catálogo según tipo, generación o catálogo inicial
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchCatalog = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const genConfig = GENERATIONS.find((g) => g.id === selectedGeneration);
-        const reqLimit = genConfig ? genConfig.limit : DEFAULT_BATCH_SIZE;
-        const reqOffset = genConfig ? genConfig.offset : 0;
+        // Si se seleccionó un tipo elemental (Fuego, Agua, Planta, Veneno, etc.)
+        if (selectedType !== 'all') {
+          const typePokemons = await getPokemonByType(selectedType);
 
-        const data = await getPokemonList(reqLimit, reqOffset);
-        setPokemonList(data);
-        setOffset(reqOffset + reqLimit);
+          // Si también hay una generación seleccionada, filtrar por los IDs de esa generación
+          const genConfig = GENERATIONS.find((g) => g.id === selectedGeneration);
+          let filteredByType = typePokemons;
+
+          if (genConfig && genConfig.id !== 'all') {
+            filteredByType = typePokemons.filter((item) => {
+              if (!item.url) return true;
+              const parts = item.url.split('/').filter(Boolean);
+              const id = parseInt(parts[parts.length - 1], 10);
+              return id >= genConfig.minId && id <= genConfig.maxId;
+            });
+          }
+
+          if (!isCancelled) {
+            setPokemonList(filteredByType);
+          }
+        } else {
+          // Modo catálogo estándar por generación o general
+          const genConfig = GENERATIONS.find((g) => g.id === selectedGeneration);
+          const reqLimit = genConfig ? genConfig.limit : DEFAULT_BATCH_SIZE;
+          const reqOffset = genConfig ? genConfig.offset : 0;
+
+          const data = await getPokemonList(reqLimit, reqOffset);
+          if (!isCancelled) {
+            setPokemonList(data);
+            setOffset(reqOffset + reqLimit);
+          }
+        }
       } catch (err) {
-        setError(err.message);
+        if (!isCancelled) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchCatalog();
-  }, [selectedGeneration]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedType, selectedGeneration]);
 
   // Soporte para deep-linking con URL hash (ej: #pokemon-25)
   useEffect(() => {
@@ -160,7 +210,7 @@ function App() {
     return () => window.removeEventListener('hashchange', checkHash);
   }, []);
 
-  // Cargar más Pokémon sin duplicar (solo disponible en modo 'Todas las Generaciones')
+  // Cargar más Pokémon sin duplicar (disponible solo en catálogo general)
   const handleLoadMore = async () => {
     try {
       setLoadingMore(true);
@@ -176,18 +226,10 @@ function App() {
 
   // Filtrado y Ordenamiento
   const processedPokemons = useMemo(() => {
-    // 1. Filtrado por nombre y por tipo
-    const filtered = pokemonList.filter((pokemon) => {
-      const matchesName = pokemon.name.toLowerCase().includes(debouncedSearch.toLowerCase());
-      if (!matchesName) return false;
-
-      if (selectedType === 'all') return true;
-
-      const details = pokemonDetailsMap[pokemon.name];
-      if (!details) return true; // Mostrar mientras se obtienen detalles
-
-      return details.types.some((t) => t.type.name === selectedType);
-    });
+    // 1. Filtrado por nombre (debounced)
+    const filtered = pokemonList.filter((pokemon) =>
+      pokemon.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
 
     // 2. Ordenamiento
     return filtered.sort((a, b) => {
@@ -210,19 +252,19 @@ function App() {
           return atqB - atqA;
         }
         case 'id-desc': {
-          const idA = detailsA?.id || 0;
-          const idB = detailsB?.id || 0;
+          const idA = detailsA?.id || (a.url ? parseInt(a.url.split('/').filter(Boolean).pop(), 10) : 0);
+          const idB = detailsB?.id || (b.url ? parseInt(b.url.split('/').filter(Boolean).pop(), 10) : 0);
           return idB - idA;
         }
         case 'id-asc':
         default: {
-          const idA = detailsA?.id || 0;
-          const idB = detailsB?.id || 0;
+          const idA = detailsA?.id || (a.url ? parseInt(a.url.split('/').filter(Boolean).pop(), 10) : 0);
+          const idB = detailsB?.id || (b.url ? parseInt(b.url.split('/').filter(Boolean).pop(), 10) : 0);
           return idA - idB;
         }
       }
     });
-  }, [pokemonList, debouncedSearch, selectedType, sortBy, pokemonDetailsMap]);
+  }, [pokemonList, debouncedSearch, sortBy, pokemonDetailsMap]);
 
   return (
     <div className={`app-container ${darkMode ? 'dark-theme' : ''}`}>
@@ -290,7 +332,6 @@ function App() {
             value={selectedGeneration}
             onChange={(e) => {
               setSelectedGeneration(e.target.value);
-              setPokemonDetailsMap({});
             }}
             className="select-control"
             title="Filtrar por Generación / Región"
@@ -298,21 +339,6 @@ function App() {
             {GENERATIONS.map((gen) => (
               <option key={gen.id} value={gen.id}>
                 {gen.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Filtro por Tipo */}
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="select-control"
-            title="Filtrar por Tipo elemental"
-          >
-            <option value="all">Todos los Tipos</option>
-            {Object.entries(TYPE_TRANSLATIONS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
               </option>
             ))}
           </select>
@@ -333,9 +359,44 @@ function App() {
           </select>
         </div>
 
+        {/* Barra de Botones Rápidos de Tipos (Agua, Planta, Fuego, Veneno, etc.) */}
+        <div className="type-chips-bar">
+          <button
+            type="button"
+            className={`type-chip-btn type-chip-all ${selectedType === 'all' ? 'active' : ''}`}
+            onClick={() => handleSelectType('all')}
+          >
+            🔘 Todos
+          </button>
+
+          {Object.entries(TYPE_TRANSLATIONS).map(([key, label]) => {
+            const isSelected = selectedType === key;
+            const color = TYPE_COLORS[key];
+            const icon = TYPE_ICONS[key] || '•';
+
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`type-chip-btn ${isSelected ? 'active' : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => handleSelectType(key)}
+                title={`Filtrar por tipo ${label}`}
+              >
+                <span>{icon}</span> {label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Contador Informativo */}
         <p className="pokemon-counter">
           Total cargados: <strong>{pokemonList.length}</strong> | Mostrando: <strong>{processedPokemons.length}</strong>
+          {selectedType !== 'all' && (
+            <span style={{ marginLeft: '10px', color: TYPE_COLORS[selectedType] || '#3b82f6', fontWeight: 'bold' }}>
+              • Filtro: {TYPE_TRANSLATIONS[selectedType] || selectedType}
+            </span>
+          )}
         </p>
 
         {/* Mensajes de Error */}
@@ -361,6 +422,8 @@ function App() {
                       key={pokemon.name}
                       pokemonName={pokemon.name}
                       isInTeam={inTeam}
+                      selectedType={selectedType}
+                      onSelectType={handleSelectType}
                       onToggleTeam={handleToggleTeam}
                       onSelect={setSelectedPokemon}
                       onLoadedDetails={handleLoadedDetails}
@@ -371,10 +434,19 @@ function App() {
             ) : (
               <div className="empty-state">
                 <p>No se encontraron Pokémon con los criterios de búsqueda seleccionados.</p>
+                {selectedType !== 'all' && (
+                  <button
+                    className="clear-team-btn"
+                    style={{ marginTop: '14px', padding: '8px 16px', fontSize: '14px' }}
+                    onClick={() => handleSelectType('all')}
+                  >
+                    Quitar filtro de tipo
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Botón Cargar Más (cuando esté en catálogo general) */}
+            {/* Botón Cargar Más (cuando esté en catálogo general sin filtro de tipo) */}
             {selectedGeneration === 'all' && selectedType === 'all' && !debouncedSearch && (
               <div className="load-more-container">
                 <button
@@ -398,6 +470,7 @@ function App() {
             (p) => p.name.toLowerCase() === selectedPokemon.name.toLowerCase()
           )}
           onToggleTeam={handleToggleTeam}
+          onSelectType={handleSelectType}
           onClose={() => setSelectedPokemon(null)}
         />
       )}

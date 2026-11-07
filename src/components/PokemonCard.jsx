@@ -11,6 +11,8 @@ import SkeletonCard from './SkeletonCard';
 function PokemonCard({
   pokemonName,
   isInTeam,
+  selectedType,
+  onSelectType,
   onToggleTeam,
   onSelect,
   onLoadedDetails
@@ -57,6 +59,8 @@ function PokemonCard({
     <PokemonCardUI
       pokemon={pokemon}
       isInTeam={isInTeam}
+      selectedType={selectedType}
+      onSelectType={onSelectType}
       onToggleTeam={onToggleTeam}
       onPlayCry={playPokemonCry}
       onSelect={onSelect}

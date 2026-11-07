@@ -3,12 +3,13 @@ import './PokemonCard.css';
 
 /**
  * Componente "Tonto" (Presentacional / UI):
- * Solo se encarga de renderizar la tarjeta a partir de las props recibidas,
- * sin realizar llamadas HTTP ni efectos colaterales de red.
+ * Solo se encarga de renderizar la tarjeta a partir de las props recibidas.
  */
 function PokemonCardUI({
   pokemon,
   isInTeam,
+  selectedType,
+  onSelectType,
   onToggleTeam,
   onPlayCry,
   onSelect
@@ -73,17 +74,25 @@ function PokemonCardUI({
 
       <h3 className="card-name">{pokemon.name}</h3>
 
+      {/* Botones interactivos de tipo (Planta, Veneno, Fuego, Agua, etc.) */}
       <div className="card-types">
         {pokemon.types.map((t) => {
           const typeName = t.type.name;
+          const isSelected = selectedType === typeName;
           return (
-            <span
+            <button
               key={typeName}
-              className="type-pill"
+              type="button"
+              className={`type-pill-btn ${isSelected ? 'active-filter' : ''}`}
               style={{ backgroundColor: TYPE_COLORS[typeName] || '#94a3b8' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onSelectType) onSelectType(typeName);
+              }}
+              title={`Filtrar por tipo ${TYPE_TRANSLATIONS[typeName] || typeName}`}
             >
               {TYPE_TRANSLATIONS[typeName] || typeName}
-            </span>
+            </button>
           );
         })}
       </div>
@@ -101,4 +110,3 @@ function PokemonCardUI({
 }
 
 export default PokemonCardUI;
-

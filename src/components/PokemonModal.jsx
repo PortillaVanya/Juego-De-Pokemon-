@@ -11,7 +11,7 @@ const STAT_LABELS = {
   speed: 'Velocidad'
 };
 
-function PokemonModal({ pokemon, isInTeam, onToggleTeam, onClose }) {
+function PokemonModal({ pokemon, isInTeam, onToggleTeam, onSelectType, onClose }) {
   const [showShiny, setShowShiny] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -61,6 +61,13 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onClose }) {
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleTypeClick = (typeName) => {
+    if (onSelectType) {
+      onSelectType(typeName);
+      onClose();
+    }
   };
 
   return (
@@ -132,17 +139,21 @@ function PokemonModal({ pokemon, isInTeam, onToggleTeam, onClose }) {
               )}
             </div>
 
+            {/* Píldoras interactivas de tipo */}
             <div className="modal-types">
               {pokemon.types.map((t) => {
                 const typeName = t.type.name;
                 return (
-                  <span
+                  <button
                     key={typeName}
-                    className="type-pill"
+                    type="button"
+                    className="modal-type-btn"
                     style={{ backgroundColor: TYPE_COLORS[typeName] || '#94a3b8' }}
+                    onClick={() => handleTypeClick(typeName)}
+                    title={`Ver todos los Pokémon de tipo ${TYPE_TRANSLATIONS[typeName] || typeName}`}
                   >
                     {TYPE_TRANSLATIONS[typeName] || typeName}
-                  </span>
+                  </button>
                 );
               })}
             </div>
