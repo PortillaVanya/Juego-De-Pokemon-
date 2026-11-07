@@ -1,0 +1,162 @@
+.team-builder-panel {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.team-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.team-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-heading, #0f172a);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-badge {
+  background: #ef4444;
+  color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.team-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.clear-team-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, #cbd5e1);
+  color: var(--text-muted, #64748b);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-team-btn:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.team-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .team-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .team-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.team-slot {
+  position: relative;
+  background: var(--badge-bg, #f8fafc);
+  border: 2px dashed var(--border-color, #cbd5e1);
+  border-radius: 12px;
+  min-height: 95px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.team-slot.filled {
+  border-style: solid;
+  border-color: var(--border-color, #cbd5e1);
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.team-slot.filled:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.slot-empty-icon {
+  font-size: 26px;
+  opacity: 0.35;
+  margin-bottom: 4px;
+}
+
+.slot-empty-text {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+}
+
+.slot-sprite {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+}
+
+.slot-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-heading, #1e293b);
+  text-transform: capitalize;
+  margin-top: 2px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.slot-remove-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}

@@ -1,0 +1,71 @@
+.skeleton-card {
+  background-color: var(--card-bg, #ffffff);
+  border-radius: 16px;
+  padding: 20px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-top: 6px solid var(--border-color, #cbd5e1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-box {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg, #f1f5f9) 25%,
+    var(--border-color, #e2e8f0) 50%,
+    var(--skeleton-bg, #f1f5f9) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.skeleton-badge {
+  width: 50px;
+  height: 14px;
+}
+
+.skeleton-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 4px 0;
+}
+
+.skeleton-title {
+  width: 110px;
+  height: 20px;
+  border-radius: 8px;
+}
+
+.skeleton-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-pill {
+  width: 55px;
+  height: 22px;
+  border-radius: 9999px;
+}
+
+.skeleton-stats {
+  width: 90%;
+  height: 16px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

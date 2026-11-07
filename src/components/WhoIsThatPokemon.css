@@ -1,0 +1,163 @@
+.minigame-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.minigame-modal {
+  position: relative;
+  background: var(--card-bg, #ffffff);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--border-color, #e2e8f0);
+}
+
+.minigame-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.minigame-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-heading, #0f172a);
+}
+
+.streak-badge {
+  background: #f59e0b;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.silhouette-box {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.pokemon-silhouette {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  transition: all 0.4s ease;
+  user-select: none;
+}
+
+.pokemon-silhouette.hidden {
+  filter: brightness(0) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
+}
+
+.pokemon-silhouette.revealed {
+  filter: brightness(1) drop-shadow(0 10px 16px rgba(0, 0, 0, 0.2));
+  animation: bounceIn 0.5s ease-out;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.85); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.minigame-question {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-heading, #1e293b);
+  margin-bottom: 18px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.option-btn {
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: capitalize;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: var(--input-bg, #f8fafc);
+  color: var(--text-heading, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover:not(:disabled) {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.option-btn.correct {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+}
+
+.option-btn.wrong {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+}
+
+.minigame-result {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.minigame-result.success {
+  color: #10b981;
+}
+
+.minigame-result.failure {
+  color: #ef4444;
+}
+
+.next-game-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+}
+
+.next-game-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}

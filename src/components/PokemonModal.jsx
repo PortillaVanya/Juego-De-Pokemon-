@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { TYPE_COLORS, TYPE_TRANSLATIONS } from '../services/pokemonService';
+import { useState, useEffect } from 'react';
+import { TYPE_COLORS, TYPE_TRANSLATIONS, playPokemonCry } from '../services/pokemonService';
 import './PokemonModal.css';
 
 const STAT_LABELS = {
@@ -11,7 +11,20 @@ const STAT_LABELS = {
   speed: 'Velocidad'
 };
 
-function PokemonModal({ pokemon, onClose }) {
+function PokemonModal({ pokemon, isInTeam, onToggleTeam, onClose }) {
+  const [showShiny, setShowShiny] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Vincular con URL hash para enlace compartible (ej: #pokemon-25)
+  useEffect(() => {
+    if (pokemon) {
+      window.history.replaceState(null, '', `#pokemon-${pokemon.id}`);
+    }
+    return () => {
+      window.history.replaceState(null, '', window.location.pathname);
+    };
+  }, [pokemon]);
+
   // Cerrar modal al presionar tecla ESC
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -28,22 +41,36 @@ function PokemonModal({ pokemon, onClose }) {
   const mainType = pokemon.types[0]?.type?.name || 'normal';
   const mainColor = TYPE_COLORS[mainType] || '#3b82f6';
 
-  const artwork =
+  const normalArtwork =
     pokemon.sprites?.other?.['official-artwork']?.front_default ||
     pokemon.sprites?.front_default;
+
+  const shinyArtwork =
+    pokemon.sprites?.other?.['official-artwork']?.front_shiny ||
+    pokemon.sprites?.front_shiny ||
+    normalArtwork;
+
+  const currentArtwork = showShiny ? shinyArtwork : normalArtwork;
 
   const formattedId = `#${String(pokemon.id).padStart(3, '0')}`;
   const heightMeters = (pokemon.height / 10).toFixed(1);
   const weightKg = (pokemon.weight / 10).toFixed(1);
 
+  const handleShare = () => {
+    const url = `${window.location.origin}${window.location.pathname}#pokemon-${pokemon.id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Encabezado con color característico del tipo principal */}
+        {/* Encabezado con color temático */}
         <div
           className="modal-header"
           style={{
-            background: `linear-gradient(135deg, ${mainColor} 0%, ${mainColor}dd 100%)`
+            background: `linear-gradient(135deg, ${mainColor} 0%, ${mainColor}cc 100%)`
           }}
         >
           <button
@@ -53,14 +80,58 @@ function PokemonModal({ pokemon, onClose }) {
           >
             ✕
           </button>
-          <img src={artwork} alt={pokemon.name} className="modal-artwork" />
+
+          <img
+            src={currentArtwork}
+            alt={pokemon.name}
+            className="modal-artwork"
+          />
+
+          {/* Acciones del encabezado: Shiny, Sonido, Compartir */}
+          <div className="modal-actions-bar">
+            <button
+              className={`modal-btn-action ${showShiny ? 'active' : ''}`}
+              onClick={() => setShowShiny(!showShiny)}
+              title="Alternar versión Shiny (Variocolor)"
+            >
+              ✨ {showShiny ? 'Normal' : 'Shiny'}
+            </button>
+
+            <button
+              className="modal-btn-action"
+              onClick={() => playPokemonCry(pokemon)}
+              title="Reproducir grito del Pokémon"
+            >
+              🔊 Sonido
+            </button>
+
+            <button
+              className="modal-btn-action"
+              onClick={handleShare}
+              title="Copiar enlace directo"
+            >
+              🔗 {copiedLink ? '¡Copiado!' : 'Compartir'}
+            </button>
+          </div>
         </div>
 
         {/* Cuerpo del Modal */}
         <div className="modal-body">
           <div className="modal-title-row">
             <span className="modal-id">{formattedId}</span>
-            <h2 className="modal-name">{pokemon.name}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <h2 className="modal-name">{pokemon.name}</h2>
+              {onToggleTeam && (
+                <button
+                  className={`team-toggle-icon-btn ${isInTeam ? 'in-team' : ''}`}
+                  onClick={() => onToggleTeam(pokemon)}
+                  title={isInTeam ? 'Quitar de mi equipo' : 'Agregar a mi equipo'}
+                >
+                  {isInTeam ? '⭐ En equipo' : '➕ Al equipo'}
+                </button>
+              )}
+            </div>
+
             <div className="modal-types">
               {pokemon.types.map((t) => {
                 const typeName = t.type.name;
@@ -104,13 +175,12 @@ function PokemonModal({ pokemon, onClose }) {
             </>
           )}
 
-          {/* Estadísticas Base */}
+          {/* Estadísticas Base con Barras */}
           <h3 className="modal-section-title">📊 Estadísticas Base</h3>
           <div className="stats-list">
             {pokemon.stats.map((s) => {
               const statName = s.stat.name;
               const val = s.base_stat;
-              // Máximo estándar para calcular porcentaje
               const pct = Math.min(100, Math.round((val / 200) * 100));
 
               return (
