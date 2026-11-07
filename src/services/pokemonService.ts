@@ -10,7 +10,7 @@ import type {
 
 const BASE_URL = import.meta.env.VITE_POKEAPI_URL || 'https://pokeapi.co/api/v2';
 
-export const DEFAULT_BATCH_SIZE = 40;
+export const DEFAULT_BATCH_SIZE = 80;
 
 /** Extrae el ID numérico del final de una URL de PokéAPI (ej: .../pokemon/25/ -> 25). */
 export const getIdFromUrl = (url: string): number => {
@@ -103,7 +103,7 @@ export const playPokemonCry = (pokemon: Pokemon | null | undefined): HTMLAudioEl
 };
 
 export const GENERATIONS: Generation[] = [
-  { id: 'all', name: 'Todas las Generaciones', offset: 0, limit: 40 },
+  { id: 'all', name: 'Todas las Generaciones', offset: 0, limit: 80 },
   { id: 'gen1', name: 'Gen 1: Kanto (#1 - #151)', offset: 0, limit: 151, minId: 1, maxId: 151 },
   { id: 'gen2', name: 'Gen 2: Johto (#152 - #251)', offset: 151, limit: 100, minId: 152, maxId: 251 },
   { id: 'gen3', name: 'Gen 3: Hoenn (#252 - #386)', offset: 251, limit: 135, minId: 252, maxId: 386 },

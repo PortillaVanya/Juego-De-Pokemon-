@@ -41,7 +41,14 @@ function App() {
   const [pokemonDetailsMap, setPokemonDetailsMap] = useState<Record<string, Pokemon>>({});
 
   // Catálogo consumido mediante React Query (Caché inteligente y deduplicación)
-  const { list: catalog, loading, error } = usePokemonCatalog(selectedType, selectedGeneration);
+  const {
+    list: catalog,
+    loading,
+    loadingMore,
+    canLoadMore,
+    loadMore,
+    error
+  } = usePokemonCatalog(selectedType, selectedGeneration);
 
   // Mostrar mensaje tipo Toast
   const showToast = useCallback((msg: string) => {
@@ -344,6 +351,21 @@ function App() {
                     Quitar filtro de tipo
                   </button>
                 )}
+              </div>
+            )}
+
+            {/* Botón para cargar 80 Pokémon adicionales sin repetir */}
+            {canLoadMore && !debouncedSearch && (
+              <div className="load-more-container">
+                <button
+                  type="button"
+                  className="load-more-btn"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  aria-label="Cargar 80 Pokémon más sin repetir"
+                >
+                  {loadingMore ? '⏳ Cargando 80 Pokémon más...' : '➕ Cargar más Pokémon (+80)'}
+                </button>
               </div>
             )}
           </>
