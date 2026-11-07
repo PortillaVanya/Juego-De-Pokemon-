@@ -51,3 +51,4 @@ const cardStyle = {
 };
 
 export default PokemonCard;
+

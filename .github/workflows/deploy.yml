@@ -1,0 +1,66 @@
+name: Deploy Pokédex App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Permisos requeridos para desplegar en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias y compilar
+        run: |
+          if [ -d "pokedex-app" ]; then
+            cd pokedex-app
+          fi
+          npm install
+          npm run build
+        env:
+          VITE_POKEAPI_URL: https://pokeapi.co/api/v2
+
+      - name: Identificar carpeta dist
+        id: select-dist
+        run: |
+          if [ -d "pokedex-app/dist" ]; then
+            echo "path=pokedex-app/dist" >> $GITHUB_OUTPUT
+          else
+            echo "path=dist" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Subir artefacto para GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.select-dist.outputs.path }}
+
+  deploy:
+    name: Despliegue a GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Desplegar sitio
+        id: deployment
+        uses: actions/deploy-pages@v4

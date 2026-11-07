@@ -19,3 +19,4 @@ export const getPokemonDetails = async (nameOrId) => {
     throw new Error(`No se pudo obtener la información de "${nameOrId}"`);
   }
 };
+
